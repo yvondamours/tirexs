@@ -57,9 +57,13 @@ defmodule Tirexs.Bulk do
       header = Dict.put([], action, meta)
 
       output = []
-      output =  output ++ [JSX.encode!(header)]
-      unless action == :delete do
-        output =  output ++ [convert_document_to_json(document)]
+      output = output ++ [JSX.encode!(header)]
+      output = case action do 
+        :delete -> output
+        :create ->
+          output ++ [convert_document_to_json(document)]
+        :update
+          output ++ [doc: convert_document_to_json(document)]]
       end
       Enum.join(output, "\n")
     end
