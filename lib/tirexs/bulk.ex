@@ -63,7 +63,7 @@ defmodule Tirexs.Bulk do
         :create ->
           output ++ [convert_document_to_json(document)]
         :update
-          output ++ [doc: convert_document_to_json(document)]]
+          output ++ [doc: convert_document_to_json(document)]
       end
       Enum.join(output, "\n")
     end
