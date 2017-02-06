@@ -3,7 +3,6 @@ defmodule Tirexs.Bulk do
 
   import Tirexs.DSL.Logic
 
-
   @doc false
   defmacro store(options, settings, [do: block]) do
     documents = extract_block(block)
@@ -43,6 +42,9 @@ defmodule Tirexs.Bulk do
       action = key(document)
       document = document[action]
       type = get_type_from_document(document)
+      document = Dict.delete(document, :_type)
+      upsert = document[:doc_as_upsert]
+      document = Dict.delete(document, :doc_as_upsert)
 
       unless id do
         id = get_id_from_document(document)
@@ -58,12 +60,16 @@ defmodule Tirexs.Bulk do
 
       output = []
       output = output ++ [JSX.encode!(header)]
-      output = case action do 
+      output = case action do
         :delete -> output
         :create ->
           output ++ [convert_document_to_json(document)]
         :update ->
-          output ++ [convert_document_to_json([doc: document])]
+          if upsert==true do
+            output ++ [convert_document_to_json([doc: document, doc_as_upsert: true])]
+          else
+            output ++ [convert_document_to_json([doc: document])]
+          end
       end
       Enum.join(output, "\n")
     end
